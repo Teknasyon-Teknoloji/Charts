@@ -427,14 +427,20 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 context.setFillColor(dataSet.color(atIndex: j).cgColor)
             }
             
-            context.fill(barRect)
-            
-            if drawBorder
-            {
-                context.setStrokeColor(borderColor.cgColor)
-                context.setLineWidth(borderWidth)
-                context.stroke(barRect)
-            }
+			let cornerRadius = CGSize(width: barRect.width / 2.0, height: barRect.width / 2.0)
+
+			#if os(iOS)
+			let bezierPath = UIBezierPath(roundedRect: barRect, byRoundingCorners: [UIRectCorner.topLeft , UIRectCorner.topRight], cornerRadii: cornerRadius)
+			context.addPath(bezierPath.cgPath)
+			context.fillPath()
+
+			if drawBorder
+			{
+				bezierPath.lineWidth = borderWidth
+				borderColor.setStroke()
+				bezierPath.stroke()
+			}
+			#endif
 
             // Create and append the corresponding accessibility element to accessibilityOrderedElements
             if let chart = dataProvider as? BarChartView
